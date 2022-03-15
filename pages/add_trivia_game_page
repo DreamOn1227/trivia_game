@@ -1,0 +1,282 @@
+import 'package:flutter/material.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/app_bars/add_trivia_game_page_app_bar.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/buttons/stepper_cancel_button.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/buttons/stepper_next_and_confirm_button.dart';
+import 'package:improve_practice_app/components/new_page/adaptive_layout_scaffold.dart';
+import 'package:improve_practice_app/components/progress_indicator/adaptive_circular_progress_center.dart';
+import 'package:improve_practice_app/constants/string/stepper_string.dart';
+
+import '../../../components/button/icon_button/clear_text_field_icon_button.dart';
+import '../../../components/empty_widget/empty_container.dart';
+import '../../../constants/string/firebase_string.dart';
+import '../../../constants/string/validator_string.dart';
+import '../../../services/firestore_methods.dart';
+import '../widgets/add_trivia_game_page_answer_group_one_container.dart';
+import '../widgets/add_trivia_game_page_answer_group_two_container.dart';
+import '../widgets/buttons/add_trivia_game_page_buttons.dart';
+import '../widgets/text_fields/add_trivia_game_page_question_text_field.dart';
+
+class AddTriviaGamePage extends StatefulWidget {
+  const AddTriviaGamePage({
+    Key? key,
+    required this.triviaGameID,
+  }) : super(key: key);
+
+  final String triviaGameID;
+
+  @override
+  _AddTriviaGamePageState createState() => _AddTriviaGamePageState();
+}
+
+class _AddTriviaGamePageState extends State<AddTriviaGamePage> {
+  final _questionFormKey = GlobalKey<FormState>();
+  final _answerGroupOneFormKey = GlobalKey<FormState>();
+  final _answerGroupTwoFormKey = GlobalKey<FormState>();
+  FirestoreMethods firestoreMethods = FirestoreMethods();
+  bool _isLoading = false;
+
+  final TextEditingController _triviaGameQuestionController =
+      TextEditingController();
+  final TextEditingController _triviaGameAnswerOneController =
+      TextEditingController();
+  final TextEditingController _triviaGameAnswerTwoController =
+      TextEditingController();
+  final TextEditingController _triviaGameAnswerThreeController =
+      TextEditingController();
+  final TextEditingController _triviaGameAnswerFourController =
+      TextEditingController();
+
+  int currentStep = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _triviaGameQuestionController.addListener(() {
+      setState(() {});
+    });
+    _triviaGameAnswerOneController.addListener(() {
+      setState(() {});
+    });
+    _triviaGameAnswerTwoController.addListener(() {
+      setState(() {});
+    });
+    _triviaGameAnswerThreeController.addListener(() {
+      setState(() {});
+    });
+    _triviaGameAnswerFourController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  List<Step> getTriviaGameSteps() => [
+        Step(
+          content: AddTriviaGamePageQuestionTextField(
+            formOneKey: _questionFormKey,
+            suffixIcon: _triviaGameQuestionController.text.isEmpty
+                ? const EmptyContainer()
+                : ClearTextFieldIconButton(
+                    onPressed: _clearTriviaGameQuestionTextField,
+                  ),
+            triviaGameQuestionController: _triviaGameQuestionController,
+            validator: _triviaGameQuestionValidator,
+          ),
+          isActive: currentStep >= 0,
+          state: currentStep > 0 ? StepState.complete : StepState.indexed,
+          title: const Text(StepperString.questions),
+        ),
+        Step(
+          content: AddTriviaGamePageAnswerGroupOneContainer(
+            answerGroupOneFormKey: _answerGroupOneFormKey,
+            suffixIconAnswerOne: _triviaGameAnswerOneController.text.isEmpty
+                ? const EmptyContainer()
+                : ClearTextFieldIconButton(
+                    onPressed: _clearTriviaGameAnswerOneTextField,
+                  ),
+            suffixIconAnswerTwo: _triviaGameAnswerTwoController.text.isEmpty
+                ? const EmptyContainer()
+                : ClearTextFieldIconButton(
+                    onPressed: _clearTriviaGameAnswerTwoTextField,
+                  ),
+            triviaGameAnswerOneController: _triviaGameAnswerOneController,
+            triviaGameAnswerTwoController: _triviaGameAnswerTwoController,
+            validatorAnswerOne: _triviaGameAnswerOneValidator,
+            validatorAnswerTwo: _triviaGameAnswerTwoValidator,
+          ),
+          isActive: currentStep >= 1,
+          state: currentStep > 1 ? StepState.complete : StepState.indexed,
+          title: const Text(StepperString.options),
+        ),
+        Step(
+          content: AddTriviaGamePageAnswerGroupTwoContainer(
+            answerGroupTwoFormKey: _answerGroupTwoFormKey,
+            suffixIconAnswerThree: _triviaGameAnswerThreeController.text.isEmpty
+                ? const EmptyContainer()
+                : ClearTextFieldIconButton(
+                    onPressed: _clearTriviaGameAnswerThreeTextField,
+                  ),
+            suffixIconAnswerFour: _triviaGameAnswerFourController.text.isEmpty
+                ? const EmptyContainer()
+                : ClearTextFieldIconButton(
+                    onPressed: _clearTriviaAnswerOptionFourTextField,
+                  ),
+            triviaGameAnswerThreeController: _triviaGameAnswerThreeController,
+            triviaGameAnswerFourController: _triviaGameAnswerFourController,
+            validatorAnswerThree: _triviaGameAnswerThreeValidator,
+            validatorAnswerFour: _triviaGameAnswerFourValidator,
+          ),
+          isActive: currentStep >= 2,
+          title: const Text(StepperString.options),
+        ),
+      ];
+
+  String? _triviaGameQuestionValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameQuestionRequired;
+    }
+    return null;
+  }
+
+  String? _triviaGameAnswerOneValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameOptionOneRequired;
+    }
+    return null;
+  }
+
+  String? _triviaGameAnswerTwoValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameOptionTwoRequired;
+    }
+    return null;
+  }
+
+  String? _triviaGameAnswerThreeValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameOptionThreeRequired;
+    }
+    return null;
+  }
+
+  String? _triviaGameAnswerFourValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameOptionFourRequired;
+    }
+    return null;
+  }
+
+  void _clearTriviaGameQuestionTextField() {
+    setState(() {
+      _triviaGameQuestionController.clear();
+    });
+  }
+
+  void _clearTriviaGameAnswerOneTextField() {
+    setState(() {
+      _triviaGameAnswerOneController.dispose();
+    });
+  }
+
+  void _clearTriviaGameAnswerTwoTextField() {
+    setState(() {
+      _triviaGameAnswerTwoController.dispose();
+    });
+  }
+
+  void _clearTriviaGameAnswerThreeTextField() {
+    setState(() {
+      _triviaGameAnswerThreeController.dispose();
+    });
+  }
+
+  void _clearTriviaAnswerOptionFourTextField() {
+    setState(() {
+      _triviaGameAnswerFourController.dispose();
+    });
+  }
+
+  Future<void> uploadQuestionDataToFirestore() async {
+    // final formOne = _formOneKey.currentState;
+    // final formTwo = _formTwoKey.currentState;
+    // final formThree = _formThreeKey.currentState;
+    // if(formOne!.validate()){}
+    setState(() {
+      _isLoading = true;
+    });
+
+    Map<String, dynamic> questionMap = {
+      FirebaseString.triviaQuestion: _triviaGameQuestionController.text,
+      FirebaseString.triviaAnswerOne: _triviaGameAnswerOneController.text,
+      FirebaseString.triviaAnswerTwo: _triviaGameAnswerTwoController.text,
+      FirebaseString.triviaAnswerThree: _triviaGameAnswerThreeController.text,
+      FirebaseString.triviaAnswerFour: _triviaGameAnswerFourController.text,
+    };
+
+    await firestoreMethods.addTriviaGameQuestionAndAnswerToFirestore(
+      questionAndAnswerData: questionMap,
+      triviaGameID: widget.triviaGameID,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _triviaGameQuestionController.dispose();
+    _triviaGameAnswerOneController.dispose();
+    _triviaGameAnswerTwoController.dispose();
+    _triviaGameAnswerThreeController.dispose();
+    _triviaGameAnswerFourController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveLayoutScaffold(
+      appBar: const AddTriviaGamePageAppBar(),
+      landscapeBodyWidget: Container(),
+      portraitBodyWidget: _isLoading
+          ? const AdaptiveCircularProgressCenter()
+          : Stepper(
+              controlsBuilder:
+                  (BuildContext context, ControlsDetails controls) {
+                final isLastStep =
+                    currentStep == getTriviaGameSteps().length - 1;
+                return AddTriviaGamePageButtons(
+                  children: [
+                    if (currentStep != 0)
+                      StepperCancelButton(
+                        onPressed: controls.onStepCancel,
+                      ),
+                    const SizedBox(
+                      width: 12.0,
+                    ),
+                    StepperNextAndConfirmButton(
+                      isLastStep: isLastStep,
+                      onPressed: controls.onStepContinue,
+                    ),
+                  ],
+                );
+              },
+              currentStep: currentStep,
+              onStepCancel: () {
+                currentStep == 0 ? null : setState(() => currentStep -= 1);
+              },
+              onStepContinue: () {
+                final isLastStep =
+                    currentStep == getTriviaGameSteps().length - 1;
+                if (isLastStep) {
+                  uploadQuestionDataToFirestore();
+                  print('Completed');
+                } else {
+                  setState(() => currentStep += 1);
+                }
+              },
+              onStepTapped: (step) => setState(() => currentStep = step),
+              steps: getTriviaGameSteps(),
+              type: StepperType.horizontal,
+            ),
+    );
+  }
+}
