@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+
+import '../../../../constants/string/text_field_label.dart';
+
+class AddTriviaGamePageQuestionTextField extends StatelessWidget {
+  /// Add Trivia Game Page Question Text Field class.
+  ///
+  /// It creates step one text field for the Add Trivia Game Page.
+
+  const AddTriviaGamePageQuestionTextField({
+    Key? key,
+    required this.formOneKey,
+    required this.suffixIcon,
+    required this.triviaGameQuestionController,
+    required this.validator,
+  }) : super(key: key);
+
+  final Key formOneKey;
+  final Widget suffixIcon;
+  final TextEditingController triviaGameQuestionController;
+  final String? Function(String?)? validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formOneKey,
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            controller: triviaGameQuestionController,
+            decoration: InputDecoration(
+              label: const Text(TextFieldLabel.question),
+              prefixIcon: Icon(
+                Icons.question_answer,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              suffixIcon: suffixIcon,
+            ),
+            keyboardType: TextInputType.text,
+            validator: validator,
+          ),
+        ],
+      ),
+    );
+  }
+}
