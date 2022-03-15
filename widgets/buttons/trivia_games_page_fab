@@ -1,0 +1,41 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../constants/app_colors.dart';
+import '../../../../constants/string/button_string.dart';
+import '../../../../settings/provider/theme_provider.dart';
+import '../../pages/create_trivia_game_page.dart';
+
+class TriviaGamesPageFAB extends StatelessWidget {
+  /// Trivia Games Page FAB class.
+  ///
+  /// It creates the floating action button displayed on the Trivia Games page that is used to navigate to the Create Trivia Game Page.
+
+  const TriviaGamesPageFAB({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context);
+    return FloatingActionButton.extended(
+      icon: Icon(
+        Icons.create,
+        color: theme.isDarkMode
+            ? AppColors.purpleDark900
+            : AppColors.brandWhite.withOpacity(
+                0.87,
+              ),
+      ),
+      label: Text(
+        ButtonString.createGame.toUpperCase(),
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CreateTriviaGamePage(),
+          ),
+        );
+      },
+    );
+  }
+}
