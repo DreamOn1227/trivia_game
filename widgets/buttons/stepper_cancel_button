@@ -1,0 +1,26 @@
+import 'package:flutter/material.dart';
+
+import '../../../../constants/string/button_string.dart';
+
+class StepperCancelButton extends StatelessWidget {
+  /// Step Cancel Button class.
+  ///
+  /// It creates the cancel button displayed in the Add Trivia Game page stepper.  The onPressed parameter is required.
+
+  const StepperCancelButton({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: OutlinedButton(
+        onPressed: onPressed,
+        child: Text(ButtonString.cancel.toUpperCase()),
+      ),
+    );
+  }
+}
