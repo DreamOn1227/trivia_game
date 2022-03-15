@@ -1,0 +1,58 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/buttons/trivia_games_page_fab.dart';
+import 'package:improve_practice_app/components/new_page/adaptive_layout_scaffold.dart';
+import 'package:improve_practice_app/components/progress_indicator/adaptive_circular_progress_sliver.dart';
+import 'package:improve_practice_app/navigation/menu/side_sheet.dart';
+
+import '../../../constants/string/firebase_string.dart';
+import '../widgets/app_bars/trivia_games_page_app_bar.dart';
+import '../widgets/trivia_game_card.dart';
+
+class TriviaGamesPage extends StatefulWidget {
+  const TriviaGamesPage({Key? key}) : super(key: key);
+
+  @override
+  _TriviaGamesPageState createState() => _TriviaGamesPageState();
+}
+
+class _TriviaGamesPageState extends State<TriviaGamesPage> {
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveLayoutScaffold(
+      drawer: const SideSheet(),
+      floatingActionButton: const TriviaGamesPageFAB(),
+      landscapeBodyWidget: Container(),
+      portraitBodyWidget: CustomScrollView(
+        slivers: [
+          const TriviaGamesPageAppBar(),
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
+                .collection(FirebaseString.triviaGame)
+                .snapshots(),
+            builder: (context,
+                AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+              return snapshot.connectionState == ConnectionState.waiting
+                  ? const AdaptiveCircularProgressSliver()
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => TriviaGameCard(
+                          triviaGameDescription: snapshot.data?.docs[index]
+                              [FirebaseString.triviaGameDescription],
+                          triviaGameID: snapshot.data?.docs[index]
+                              [FirebaseString.triviaGameID],
+                          triviaGameImageURL: snapshot.data?.docs[index]
+                              [FirebaseString.triviaGameImageURL],
+                          triviaGameTitle: snapshot.data?.docs[index]
+                              [FirebaseString.triviaGameTitle],
+                        ),
+                        childCount: snapshot.data?.docs.length,
+                      ),
+                    );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
