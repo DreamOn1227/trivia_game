@@ -1,0 +1,26 @@
+import 'package:flutter/material.dart';
+
+class AddTriviaGamePageButtons extends StatelessWidget {
+  /// Add Trivia Game Page Buttons class.
+  ///
+  /// It creates the container used to display the cancel and next/ confirm buttons displayed on the Add Trivia Game page.  The children parameter is required.
+
+  const AddTriviaGamePageButtons({
+    Key? key,
+    required this.children,
+  }) : super(key: key);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 16.0,
+      ),
+      child: Row(
+        children: children,
+      ),
+    );
+  }
+}
