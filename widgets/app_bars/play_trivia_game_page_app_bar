@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+
+import '../../../../components/app_bar/brand_app_bar.dart';
+import '../../../../constants/string/page_name.dart';
+import '../../../../navigation/pop_up_menu/brand_pop_up_menu.dart';
+
+class PlayTriviaGamePageAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const PlayTriviaGamePageAppBar({Key? key}) : super(key: key);
+
+  @override
+  Size get preferredSize => const Size.fromHeight(56.0);
+
+  @override
+  Widget build(BuildContext context) {
+    return const BrandAppBar(
+      actions: [
+        BrandPopUpMenu(),
+      ],
+      pageName: PageName.playTriviaGame,
+    );
+  }
+}
