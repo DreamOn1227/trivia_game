@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/app_bars/results_page_app_bar.dart';
+import 'package:improve_practice_app/components/new_page/adaptive_layout_scaffold.dart';
+
+class ResultsPage extends StatefulWidget {
+  const ResultsPage({
+    Key? key,
+    required this.correctAnswers,
+    required this.incorrectAnswers,
+    required this.totalScore,
+  }) : super(key: key);
+
+  final int correctAnswers;
+  final int incorrectAnswers;
+  final int totalScore;
+
+  @override
+  State<ResultsPage> createState() => _ResultsPageState();
+}
+
+class _ResultsPageState extends State<ResultsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveLayoutScaffold(
+      appBar: const ResultsPageAppBar(),
+      landscapeBodyWidget: Container(),
+      portraitBodyWidget: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('${widget.correctAnswers}/${widget.totalScore}'),
+            const SizedBox(
+              height: 8.0,
+            ),
+            Text(
+                'You had ${widget.correctAnswers} correct answers and ${widget.incorrectAnswers} incorrect answers'),
+          ],
+        ),
+      ),
+    );
+  }
+}
