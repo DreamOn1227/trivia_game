@@ -1,0 +1,9 @@
+class TriviaGameQuestionModel {
+  String? triviaQuestion;
+  String? triviaAnswerOne;
+  String? triviaAnswerTwo;
+  String? triviaAnswerThree;
+  String? triviaAnswerFour;
+  String? correctAnswer;
+  late bool answered;
+}
