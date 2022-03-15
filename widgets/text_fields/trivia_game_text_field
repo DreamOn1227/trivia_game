@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+
+class TriviaGameTextField extends StatelessWidget {
+  /// Trivia Game Text Field class.
+  ///
+  /// It creates the text fields used on the Create Trivia Game page.  The labelText, onChanged, suffixIcon, textController and validator parameters are required.
+
+  const TriviaGameTextField({
+    Key? key,
+    required this.labelText,
+    required this.onChanged,
+    required this.prefixIcon,
+    required this.suffixIcon,
+    required this.textController,
+    required this.validator,
+  }) : super(key: key);
+
+  final String labelText;
+  final Function(String?)? onChanged;
+  final IconData prefixIcon;
+  final Widget suffixIcon;
+  final TextEditingController textController;
+  final String? Function(String?)? validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        bottom: 16.0,
+      ),
+      child: TextFormField(
+        controller: textController,
+        decoration: InputDecoration(
+          label: Text(labelText),
+          prefixIcon: Icon(
+            Icons.image,
+            color: Theme.of(context).iconTheme.color,
+          ),
+          suffixIcon: suffixIcon,
+        ),
+        keyboardType: TextInputType.text,
+        onChanged: onChanged,
+        validator: validator,
+      ),
+    );
+  }
+}
