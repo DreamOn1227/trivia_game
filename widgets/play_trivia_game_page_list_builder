@@ -1,0 +1,26 @@
+import 'package:flutter/material.dart';
+
+class PlayTriviaGamePageListBuilder extends StatelessWidget {
+  /// Play Trivia Game Page List Builder class.
+  ///
+  /// It creates the list view builder on the Play Trivia Game Page that displays the trivia game questions and answers in a container.  The itemBuilder and itemCount parameters are required.
+
+  const PlayTriviaGamePageListBuilder({
+    Key? key,
+    required this.itemBuilder,
+    required this.itemCount,
+  }) : super(key: key);
+
+  final Widget Function(BuildContext, int) itemBuilder;
+  final int? itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const ClampingScrollPhysics(),
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+    );
+  }
+}
