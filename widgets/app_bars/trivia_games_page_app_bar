@@ -1,0 +1,25 @@
+import 'package:flutter/material.dart';
+
+import '../../../../components/new_page/sliver_header.dart';
+import '../../../../constants/string/page_name.dart';
+import '../../../../navigation/pop_up_menu/brand_pop_up_menu.dart';
+
+class TriviaGamesPageAppBar extends StatelessWidget {
+  /// Trivia Games Page App Bar class.
+  ///
+  /// It creates the expanded app bar displayed on the Trivia Games page.
+
+  const TriviaGamesPageAppBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const SliverHeader(
+      actions: [
+        BrandPopUpMenu(),
+      ],
+      backgroundIconPortrait: Icons.games,
+      expandedHeight: 150.0,
+      pageName: PageName.triviaGames,
+    );
+  }
+}
