@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+
+import '../../../../components/button/elevated_button/platform_elevated_button.dart';
+import '../../../../constants/string/button_string.dart';
+
+class StepperNextAndConfirmButton extends StatelessWidget {
+  /// Stepper Next And Confirm Button class.
+  ///
+  /// It creates the stepper button on the Add Trivia Game Page
+
+  const StepperNextAndConfirmButton({
+    Key? key,
+    required this.isLastStep,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final bool isLastStep;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: PlatformElevatedButton(
+        onPressed: onPressed,
+        buttonText: isLastStep
+            ? ButtonString.confirm.toUpperCase()
+            : ButtonString.next.toUpperCase(),
+      ),
+    );
+  }
+}
