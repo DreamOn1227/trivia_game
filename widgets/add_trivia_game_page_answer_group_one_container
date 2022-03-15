@@ -1,0 +1,70 @@
+import 'package:flutter/material.dart';
+
+import '../../../constants/string/text_field_label.dart';
+
+class AddTriviaGamePageAnswerGroupOneContainer extends StatelessWidget {
+  /// Add Trivia Game Page Answer Group One Container class.
+  ///
+  /// It creates the form that contains the text fields for answer one and answer two on the Add Trivia Game Page.  Answer one should always be the correct answer to the question.  The answers are shuffled when displayed to the user so the correct answer is always in a different position.  The answerGroupOneKey, the suffixIconAnswerOne, the suffixIconAnswerTwo, the triviaGameAnswerOneController, the triviaGameAnswerTwoController, the validatorAnswerOne and the validatorAnswerTwo parameters are required.
+
+  const AddTriviaGamePageAnswerGroupOneContainer({
+    Key? key,
+    required this.answerGroupOneFormKey,
+    required this.suffixIconAnswerOne,
+    required this.suffixIconAnswerTwo,
+    required this.triviaGameAnswerOneController,
+    required this.triviaGameAnswerTwoController,
+    required this.validatorAnswerOne,
+    required this.validatorAnswerTwo,
+  }) : super(key: key);
+
+  final Key answerGroupOneFormKey;
+  final Widget suffixIconAnswerOne;
+  final Widget suffixIconAnswerTwo;
+  final TextEditingController triviaGameAnswerOneController;
+  final TextEditingController triviaGameAnswerTwoController;
+  final String? Function(String?)? validatorAnswerOne;
+  final String? Function(String?)? validatorAnswerTwo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: answerGroupOneFormKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              controller: triviaGameAnswerOneController,
+              decoration: InputDecoration(
+                label: const Text(TextFieldLabel.answerOne),
+                prefixIcon: Icon(
+                  Icons.question_answer,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                suffixIcon: suffixIconAnswerOne,
+              ),
+              keyboardType: TextInputType.text,
+              validator: validatorAnswerOne,
+            ),
+            const SizedBox(
+              height: 16.0,
+            ),
+            TextFormField(
+              controller: triviaGameAnswerTwoController,
+              decoration: InputDecoration(
+                label: const Text(TextFieldLabel.answerTwo),
+                prefixIcon: Icon(
+                  Icons.question_answer,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                suffixIcon: suffixIconAnswerTwo,
+              ),
+              keyboardType: TextInputType.text,
+              validator: validatorAnswerTwo,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
