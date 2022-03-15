@@ -1,0 +1,263 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:improve_practice_app/app/trivia_games/pages/add_trivia_game_page.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/app_bars/create_trivia_game_page_app_bar.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/buttons/trivia_container_button.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/buttons/trivia_game_image_url_button.dart';
+import 'package:improve_practice_app/app/trivia_games/widgets/text_fields/trivia_game_text_field.dart';
+import 'package:improve_practice_app/components/new_page/adaptive_layout_scaffold.dart';
+import 'package:improve_practice_app/components/progress_indicator/adaptive_circular_progress_center.dart';
+import 'package:improve_practice_app/constants/string/dialog_string.dart';
+import 'package:improve_practice_app/constants/string/text_field_label.dart';
+import 'package:improve_practice_app/services/firestore_methods.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:image/image.dart' as im;
+
+import '../../../components/button/icon_button/clear_text_field_icon_button.dart';
+import '../../../components/dialog/brand_simple_dialog.dart';
+import '../../../components/empty_widget/empty_container.dart';
+import '../../../constants/string/button_string.dart';
+import '../../../constants/string/firebase_string.dart';
+import '../../../constants/string/snack_bar_string.dart';
+import '../../../constants/string/validator_string.dart';
+import '../../../services/auth.dart';
+
+class CreateTriviaGamePage extends StatefulWidget {
+  const CreateTriviaGamePage({Key? key}) : super(key: key);
+
+  @override
+  _CreateTriviaGamePageState createState() => _CreateTriviaGamePageState();
+}
+
+class _CreateTriviaGamePageState extends State<CreateTriviaGamePage> {
+  final _formKey = GlobalKey<FormState>();
+  File? file;
+  String triviaGameImageID = const Uuid().v4();
+  String? triviaGameDescription;
+  String? triviaGameImageURL;
+  String? triviaGameTitle;
+  late bool _isLoading = false;
+  FirestoreMethods firestoreMethods = FirestoreMethods();
+  final TextEditingController _triviaGameDescriptionController =
+      TextEditingController();
+  final TextEditingController _triviaGameTitleController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _triviaGameDescriptionController.addListener(() {
+      setState(() {});
+    });
+    _triviaGameTitleController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  String? _triviaGameDescriptionValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameDescriptionRequired;
+    }
+    return null;
+  }
+
+  String? _triviaGameTitleValidator(value) {
+    if (value == null || value.isEmpty) {
+      return ValidatorString.triviaGameTitleRequired;
+    }
+    return null;
+  }
+
+  void _clearTriviaGameDescriptionTextField() {
+    setState(() {
+      _triviaGameDescriptionController.clear();
+    });
+  }
+
+  void _clearTriviaGameTitleTextField() {
+    setState(() {
+      _triviaGameTitleController.clear();
+    });
+  }
+
+  Future<void> _captureImageWithCamera() async {
+    Navigator.pop(context);
+    XFile? pickedFile = await ImagePicker().pickImage(
+      imageQuality: 85,
+      maxHeight: 675,
+      maxWidth: 960,
+      source: ImageSource.camera,
+    );
+    setState(() {
+      file = File(pickedFile!.path);
+    });
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    Navigator.pop(context);
+    XFile? pickedFile = await ImagePicker().pickImage(
+      imageQuality: 85,
+      source: ImageSource.gallery,
+    );
+    setState(() {
+      file = File(pickedFile!.path);
+    });
+  }
+
+  Future<void> _selectTriviaGameImage(mContext) async {
+    showDialog(
+        context: mContext,
+        builder: (context) {
+          return BrandSimpleDialog(
+            dialogTitle: DialogString.createTriviaGame,
+            optionOneCallback: _captureImageWithCamera,
+            optionOneText: DialogString.captureWithCamera,
+            optionTwoCallback: _pickImageFromGallery,
+            optionTwoText: DialogString.selectFromGallery,
+          );
+        });
+  }
+
+  Future<void> _compressTriviaGameImage() async {
+    final tempDirectory = await getTemporaryDirectory();
+    final path = tempDirectory.path;
+    im.Image? postImageFile = im.decodeImage(file!.readAsBytesSync());
+    final compressedImageFile = File('$path/img_$triviaGameImageID.jpg')
+      ..writeAsBytesSync(
+        im.encodeJpg(
+          postImageFile!,
+          quality: 85,
+        ),
+      );
+    setState(() {
+      file = compressedImageFile;
+    });
+  }
+
+  Future<String> _uploadTriviaGameImage(triviaGameImageFile) async {
+    UploadTask uploadTask = Auth()
+        .storageReference
+        .child(FirebaseString.triviaGameImages)
+        .child('triviaGameImage_$triviaGameImageID.jpg')
+        .putFile(triviaGameImageFile);
+    TaskSnapshot storageTaskSnapshot = await uploadTask;
+    String triviaGameUrl = await storageTaskSnapshot.ref.getDownloadURL();
+    return triviaGameUrl;
+  }
+
+  Future<void> _createFirestoreTriviaGame() async {
+    final form = _formKey.currentState;
+    if (form!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      String triviaGameID = const Uuid().v4();
+      String triviaGameImageUrl = await _uploadTriviaGameImage(file);
+      Map<String, dynamic> triviaGameMap = {
+        FirebaseString.triviaGameDescription: triviaGameDescription,
+        FirebaseString.triviaGameID: triviaGameID,
+        FirebaseString.triviaGameImageURL: triviaGameImageUrl,
+        FirebaseString.triviaGameTitle: triviaGameTitle,
+      };
+      try {
+        await _compressTriviaGameImage();
+        await firestoreMethods.addTriviaGameToFirestore(
+          triviaGameData: triviaGameMap,
+          triviaGameID: triviaGameID,
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(SnackBarString.triviaGameCreated),
+          ),
+        );
+        Timer(const Duration(seconds: 1), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddTriviaGamePage(
+                triviaGameID: triviaGameID,
+              ),
+            ),
+          );
+        });
+      } catch (e) {
+        print(e.toString());
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _triviaGameDescriptionController.dispose();
+    _triviaGameTitleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveLayoutScaffold(
+      appBar: const CreateTriviaGamePageAppBar(),
+      landscapeBodyWidget: Container(),
+      portraitBodyWidget: _isLoading
+          ? const AdaptiveCircularProgressCenter()
+          : Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 16.0,
+                    ),
+                    TriviaGameTextField(
+                      labelText: TextFieldLabel.triviaGameTitle,
+                      onChanged: (val) {
+                        triviaGameTitle = val as String;
+                      },
+                      prefixIcon: Icons.title,
+                      suffixIcon: _triviaGameTitleController.text.isEmpty
+                          ? const EmptyContainer()
+                          : ClearTextFieldIconButton(
+                              onPressed: _clearTriviaGameTitleTextField,
+                            ),
+                      textController: _triviaGameTitleController,
+                      validator: _triviaGameTitleValidator,
+                    ),
+                    TriviaGameTextField(
+                      labelText: TextFieldLabel.triviaGameDescription,
+                      onChanged: (val) {
+                        triviaGameDescription = val as String;
+                      },
+                      prefixIcon: Icons.description,
+                      suffixIcon: _triviaGameDescriptionController.text.isEmpty
+                          ? const EmptyContainer()
+                          : ClearTextFieldIconButton(
+                              onPressed: _clearTriviaGameDescriptionTextField,
+                            ),
+                      textController: _triviaGameDescriptionController,
+                      validator: _triviaGameDescriptionValidator,
+                    ),
+                    TriviaGameImageUrlButton(
+                      buttonText: ButtonString.triviaGameImageUrl,
+                      onTap: () => _selectTriviaGameImage(context),
+                    ),
+                    TriviaContainerButton(
+                      buttonText: ButtonString.createTriviaGame,
+                      onTap: () {
+                        _createFirestoreTriviaGame();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+}
